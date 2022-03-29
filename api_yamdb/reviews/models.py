@@ -1,4 +1,15 @@
+from django.conf import settings
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+
+class User(AbstractUser):
+    email = models.EmailField(max_length=55, unique=True, blank=False)
+    bio = models.TextField(blank=True)
+    role = models.CharField(max_length=20, choices=settings.ROLE_CHOICES, default='USER')
+
+    def __str__(self):
+        return self.username
 
 
 class Genres(models.Model):
@@ -19,16 +30,18 @@ class Categories(models.Model):
 
 
 class Titles(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=250)
     genre = models.ForeignKey(
         Genres,
         on_delete=models.SET_NULL,
-        related_name='titles'
+        related_name='titles',
+        null=True
     )
     categories = models.ForeignKey(
         Categories,
         on_delete=models.SET_NULL,
-        related_name='titles'
+        related_name='titles',
+        null=True
     )
     descriptions = models.TextField(),
     year = models.IntegerField()
