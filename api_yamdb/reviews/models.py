@@ -1,8 +1,45 @@
 from django.db import models
 
+
+class Genres(models.Model):
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Categories(models.Model):
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=50, unique=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
+class Titles(models.Model):
+    name = models.CharField()
+    genre = models.ForeignKey(
+        Genres,
+        on_delete=models.SET_NULL,
+        related_name='titles'
+    )
+    categories = models.ForeignKey(
+        Categories,
+        on_delete=models.SET_NULL,
+        related_name='titles'
+    )
+    descriptions = models.TextField(),
+    year = models.IntegerField()
+
+    def __str__(self):
+        return self.name
+
+
 class Review(models.Model):
     title_id = models.ForeignKey(
-        Title,
+        Titles,
         related_name='reviews',
         on_delete=models.CASCADE,
         verbose_name='Произведение'
@@ -11,7 +48,7 @@ class Review(models.Model):
         max_length=500,
         verbose_name='Текст отзыва'
     )
-    author = models.ForeignKey( 
+    author = models.ForeignKey(
         User,
         related_name='reviews',
         on_delete=models.CASCADE,
