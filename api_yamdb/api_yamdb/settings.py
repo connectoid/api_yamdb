@@ -123,7 +123,16 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    # Устанавливаем срок жизни токена
    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
    'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+
+EMAIL_HOST = 'smtp.yandex.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = "Team1TeamWork5@yandex.ru"
+EMAIL_HOST_PASSWORD = "wxzymeqzwpziqgdy"
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
