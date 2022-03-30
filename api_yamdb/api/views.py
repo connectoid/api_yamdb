@@ -6,9 +6,15 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from reviews.models import User
+from rest_framework.pagination import LimitOffsetPagination
+from django.contrib.auth.tokens import default_token_generator
+from rest_framework_simplejwt.tokens import AccessToken
 
-from .serializers import ConfirmCodeSerializer, EmailSerializer
+
+from reviews.models import User, Review, Comment, Title
+from .mixins import UpdateDeleteViewSet
+from .permissions import OwnerOrReadOnly
+from .serializers import ConfirmCodeSerializer, EmailSerializer, ReviewSerializer, CommentSerializer
 
 
 @api_view(['POST'])
@@ -24,7 +30,8 @@ def confirmation_code(request):
         User.objects.create(username=username, email=email)
     alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     confirmation_code = ''.join(random.choice(alphabet) for i in range(16))
-    # confirmation_code = default_token_generator.make_token(username)
+    print('####', confirmation_code)
+    #confirmation_code = default_token_generator.make_token(username)
     send_mail(
         subject='Код для получения пароля',
         message=f'Ваш код для получения пароля: {confirmation_code}',
@@ -35,12 +42,39 @@ def confirmation_code(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# @api_view(['POST'])
-# def get_jwt_token(request):
-# """Check confirmation_code and send JWT-token"""
-#     serializer = ConfirmCodeSerializer(data=request.data)
-#     serializer.is_valid(raise_exception=True)
-#     email = serializer.data['email']
-#     user = get_object_or_404(User, email=email)
-#     confirmation_code = serializer.data['confirmation_code']
-#
+@api_view(['POST'])
+def get_jwt_token(request):
+    """Check confirmation_code and send JWT-token"""
+    serializer = ConfirmCodeSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    #email = serializer.data['email']
+    username = serializer.data['username']
+    user = get_object_or_404(User, username=username)
+    confirmation_code = serializer.data['confirmation_code']
+    print('@@@@', confirmation_code)
+     
+    """ ЗАМЕНИТЬ НА НОРМАЛЬНУЮ ПРОВЕРКУ КОДА"""
+
+    if confirmation_code:
+       token = AccessToken.for_user(user)
+       return Response({str(token)})
+
+class ReviewViewSet(UpdateDeleteViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = (OwnerOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        serializer.save(author=self.request.user, title=title)
+
+class CommentViewSet(UpdateDeleteViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (OwnerOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
