@@ -30,7 +30,6 @@ def confirmation_code(request):
         User.objects.create(username=username, email=email)
     alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     confirmation_code = ''.join(random.choice(alphabet) for i in range(16))
-    print('####', confirmation_code)
     #confirmation_code = default_token_generator.make_token(username)
     send_mail(
         subject='Код для получения пароля',
@@ -51,7 +50,6 @@ def get_jwt_token(request):
     username = serializer.data['username']
     user = get_object_or_404(User, username=username)
     confirmation_code = serializer.data['confirmation_code']
-    print('@@@@', confirmation_code)
      
     """ ЗАМЕНИТЬ НА НОРМАЛЬНУЮ ПРОВЕРКУ КОДА"""
 
@@ -77,4 +75,7 @@ class CommentViewSet(UpdateDeleteViewSet):
     pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        title_id = self.kwargs.get('title_id')
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id, title=title_id)
+        serializer.save(author=self.request.user, review=review)
