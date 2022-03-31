@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from api.validators import validate_score
+
 
 class User(AbstractUser):
     email = models.EmailField(max_length=55, unique=True, blank=False)
@@ -37,7 +39,7 @@ class Genre(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.CharField(max_length=50, unique=True)
     description = models.TextField()
 
     def __str__(self):
@@ -46,19 +48,17 @@ class Category(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=250)
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genre,
-        on_delete=models.SET_NULL,
         related_name='titles',
-        null=True
     )
-    categories = models.ForeignKey(
+    category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
         null=True
     )
-    descriptions = models.TextField()
+    descriptions = models.TextField(null=True, blank=True)
     year = models.IntegerField()
 
     def __str__(self):
@@ -70,7 +70,7 @@ class Review(models.Model):
         Title,
         related_name='reviews',
         on_delete=models.CASCADE,
-        verbose_name='Произведение'
+        verbose_name='Произведение',
     )
     text = models.TextField(
         max_length=500,
@@ -83,7 +83,8 @@ class Review(models.Model):
         verbose_name='Автор отзыва'
     )
     score = models.IntegerField(
-        verbose_name='Оценка'
+        verbose_name='Оценка',
+        validators=[validate_score]
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,

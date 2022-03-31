@@ -24,3 +24,11 @@ class UpdateDeleteViewSet(
         if self.action == 'retrieve':
             return (ReadOnly(),)
         return super().get_permissions()
+
+
+class ListCreateDeleteViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin,
+    mixins.DestroyModelMixin, mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
+    pass

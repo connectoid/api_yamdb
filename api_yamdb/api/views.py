@@ -4,21 +4,25 @@ from datetime import datetime
 from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import status, filters, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
 
-from reviews.models import User, Review, Comment, Title
-from .mixins import UpdateDeleteViewSet
-from .permissions import OwnerOrReadOnly
-from .serializers import (ConfirmCodeSerializer, EmailSerializer,
-                          ReviewSerializer, CommentSerializer,
-                          UserInfoSerializer, UserSerializer)
+
+from reviews.models import Category, Genre, User, Review, Comment, Title
+from .mixins import UpdateDeleteViewSet, ListCreateDeleteViewSet
+from .permissions import AdminOnly, OwnerOrReadOnly
+from .serializers import (CategorySerializer, ConfirmCodeSerializer,
+                          EmailSerializer, GenreSerializer,
+                          ReviewSerializer, CommentSerializer, TitleSerializer,
+                          UserSerializer, UserInfoSerializer)
 
 
 @api_view(['POST'])
@@ -72,10 +76,39 @@ class CommentViewSet(UpdateDeleteViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
+class CategoryViewSet(ListCreateDeleteViewSet):
+    lookup_field = 'slug'
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (AdminOnly,)
+    pagination_class = PageNumberPagination
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class GenreViewSet(ListCreateDeleteViewSet):
+    lookup_field = 'slug'
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (AdminOnly,)
+    pagination_class = PageNumberPagination
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (AdminOnly,)
+    pagination_class = PageNumberPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year',)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = (AdminOnly,)
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('username',)
 
