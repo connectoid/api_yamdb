@@ -3,6 +3,8 @@ import datetime
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from rest_framework.relations import SlugRelatedField
+from rest_framework.generics import get_object_or_404
+from rest_framework.exceptions import ValidationError
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,11 +33,20 @@ class ConfirmCodeSerializer(serializers.Serializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
     title = SlugRelatedField(slug_field='name', read_only=True)
-
+    
     class Meta:
         fields = '__all__'
         model = Review
 
+    def validate(self, data):
+        request = self.context['request']
+        user = request.user
+        pk = request.parser_context['kwargs'].get('title_id')
+        title = get_object_or_404(Title, pk=pk)
+        if request.method == 'POST':
+            if Review.objects.filter(title=title, author=user).exists():
+                raise ValidationError('Вы уже оставляли комментарий к этому обзору')
+        return data
 
 class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
