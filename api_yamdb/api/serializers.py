@@ -1,4 +1,5 @@
 import re
+import datetime
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from rest_framework.relations import SlugRelatedField
@@ -85,3 +86,11 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = '__all__'
+
+    def validate_year(self, value):
+        year = datetime.date.today().year
+        if value > year:
+            raise serializers.ValidationError(
+                f'Год выпуска не может быть больше {year}'
+            )
+        return value
