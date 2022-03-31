@@ -3,9 +3,10 @@ from rest_framework import routers
 
 from .views import (CategoryViewSet, GenreViewSet, ReviewViewSet,
                     CommentViewSet, TitleViewSet,
-                    confirmation_code, get_jwt_token, UserInfoView)
+                    confirmation_code, get_jwt_token, UserInfoView, UserViewSet)
 
 router = routers.SimpleRouter()
+router.register('users', UserViewSet, basename='users')
 router.register(r'titles', TitleViewSet, basename='titles')
 router.register(r'titles/(?P<title_id>\d+)/reviews',
                 ReviewViewSet, basename='reviews')
