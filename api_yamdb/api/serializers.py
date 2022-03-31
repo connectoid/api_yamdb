@@ -14,10 +14,21 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class EmailSerializer(serializers.Serializer):
+class EmailSerializer(serializers.ModelSerializer):
     """Email serializer"""
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email',)
+
+    def validate_username(self, username):
+        if username == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя пользователя "me" не разрешено.'
+            )
+        return username
 
 
 class ConfirmCodeSerializer(serializers.Serializer):
@@ -37,7 +48,19 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
-    review = SlugRelatedField(slug_field='text',read_only=True)
+    review = SlugRelatedField(slug_field='text', read_only=True)
+
     class Meta:
         fields = '__all__'
         model = Comment
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'first_name', 'last_name', 'email', 'bio', 'role'
+        )
