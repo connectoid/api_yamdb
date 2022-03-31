@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from rest_framework.relations import SlugRelatedField
@@ -37,7 +38,50 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
-    review = SlugRelatedField(slug_field='text',read_only=True)
+    review = SlugRelatedField(slug_field='text', read_only=True)
+
     class Meta:
         fields = '__all__'
         model = Comment
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    description = serializers.StringRelatedField(required=False)
+
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+    def validate_slug(self, value):
+        pattern = '^[-a-zA-Z0-9_]+$'
+        if not re.fullmatch(pattern, value):
+            raise serializers.ValidationError(
+                'Недопустимые символы в поле slug'
+            )
+        return value
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    description = serializers.StringRelatedField(required=False)
+
+    class Meta:
+        model = Genre
+        fields = '__all__'
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        read_only=False,
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        read_only=False,
+        many=True,
+        queryset=Genre.objects.all()
+    )
+
+    class Meta:
+        model = Title
+        fields = '__all__'
