@@ -29,9 +29,14 @@ from .serializers import (CategorySerializer, ConfirmCodeSerializer,
 def confirmation_code(request):
     """Send confirmation_code by email"""
     serializer = EmailSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    user = serializer.save()
+    serializer.is_valid(raise_exception=True)
+    username = serializer.data['username']
+    email = serializer.data['email']
+    if not User.objects.filter(username=username).exists():
+        user = User.objects.create_user(username=username, email=email)
+        send_confirm_code(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    user = get_object_or_404(User, username=username, email=email)
     send_confirm_code(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 

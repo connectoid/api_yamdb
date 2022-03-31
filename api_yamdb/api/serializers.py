@@ -105,10 +105,17 @@ class TitleSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Genre.objects.all()
     )
+    score = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'category', 'genre',
+            'year', 'descriptions', 'score',
+        )
+
+    def get_score(self, obj):
+        return obj.reviews.all().aggregate(Avg('score'))
 
     def validate_year(self, value):
         year = datetime.date.today().year
