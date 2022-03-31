@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from api.validators import validate_score
+
 
 class User(AbstractUser):
     email = models.EmailField(max_length=55, unique=True, blank=False)
@@ -58,7 +60,7 @@ class Review(models.Model):
         Title,
         related_name='reviews',
         on_delete=models.CASCADE,
-        verbose_name='Произведение'
+        verbose_name='Произведение',
     )
     text = models.TextField(
         max_length=500,
@@ -71,7 +73,8 @@ class Review(models.Model):
         verbose_name='Автор отзыва'
     )
     score = models.IntegerField(
-        verbose_name='Оценка'
+        verbose_name='Оценка',
+        validators=[validate_score]
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
