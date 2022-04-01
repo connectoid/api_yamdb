@@ -27,7 +27,7 @@ def import_csv(filename):
 import_csv('category.csv')
 import_csv('genre.csv')
 import_csv('title.csv')
-import_csv('genre_title.csv')
+#import_csv('genre_title.csv')
 import_csv('review.csv')
 import_csv('comments.csv')
 import_csv('users.csv')
