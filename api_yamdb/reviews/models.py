@@ -40,7 +40,7 @@ class Genre(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.CharField(max_length=50, unique=True)
-    description = models.TextField()
+    description = models.TextField(null=True)
 
     def __str__(self):
         return self.name
