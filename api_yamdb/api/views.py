@@ -22,7 +22,8 @@ from .permissions import AdminOnly, OwnerOrReadOnly
 from .serializers import (CategorySerializer, ConfirmCodeSerializer,
                           EmailSerializer, GenreSerializer,
                           ReviewSerializer, CommentSerializer, TitleSerializer,
-                          UserSerializer, UserInfoSerializer)
+                          TitleListSerializer, UserSerializer,
+                          UserInfoSerializer)
 
 
 @api_view(['POST'])
@@ -103,11 +104,15 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     permission_classes = (AdminOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year',)
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return TitleListSerializer
+        return TitleSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
