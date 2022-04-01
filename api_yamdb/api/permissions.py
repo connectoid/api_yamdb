@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from django.conf import settings
 
 
 class OwnerOrReadOnly(permissions.BasePermission):
@@ -22,5 +23,6 @@ class ReadOnly(permissions.BasePermission):
 class AdminOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
+        role_list = settings.ROLE_CHOICES[2]
         return (request.method in permissions.SAFE_METHODS
-                or request.user.role == 'admin')
+                or request.user.role in role_list)

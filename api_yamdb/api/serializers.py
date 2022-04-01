@@ -3,6 +3,7 @@ import datetime
 
 from django.db.models import Avg
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from rest_framework.relations import SlugRelatedField
 from rest_framework.generics import get_object_or_404
@@ -97,6 +98,24 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TitleListSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        read_only=False,
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        read_only=False,
+        many=True,
+        queryset=Genre.objects.all()
+    )
+
+    class Meta:
+        model = Title
+        fields = ('__all__')
+
+
 class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -117,9 +136,17 @@ class TitleSerializer(serializers.ModelSerializer):
             'id', 'name', 'category', 'genre',
             'year', 'descriptions', 'score',
         )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Title.objects.all(),
+                fields=('name', 'year'),
+                message='Такое произведениеe уже сущесвтует'
+            )
+        ]
 
     def get_score(self, obj):
-        return obj.reviews.all().aggregate(Avg('score'))
+        score = obj.reviews.all().aggregate(Avg('score'))
+        return score['score__avg']
 
     def validate_year(self, value):
         year = datetime.date.today().year
