@@ -26,3 +26,8 @@ class AdminOnly(permissions.BasePermission):
         role_list = settings.ROLE_CHOICES[2]
         return (request.method in permissions.SAFE_METHODS
                 or request.user.role in role_list)
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        return (user.is_authenticated and user.is_admin
+                or user.is_superuser)

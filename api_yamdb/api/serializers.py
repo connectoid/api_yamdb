@@ -12,7 +12,9 @@ from rest_framework.exceptions import ValidationError
 
 class UserSerializer(serializers.ModelSerializer):
     """User serializer"""
-    role = serializers.ReadOnlyField()
+    username = serializers.CharField(required=True)
+    email = serializers.CharField(required=True)
+    role = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = User
@@ -160,6 +162,7 @@ class TitleSerializer(serializers.ModelSerializer):
 class UserInfoSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
+    role = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = User
