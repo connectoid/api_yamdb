@@ -73,7 +73,6 @@ class Review(models.Model):
         related_name='reviews',
         on_delete=models.CASCADE,
         verbose_name='Произведение',
-        db_column='title'
     )
     text = models.TextField(
         max_length=500,
@@ -107,7 +106,6 @@ class Comment(models.Model):
         related_name='comments',
         on_delete=models.CASCADE,
         verbose_name='Отзыв',
-        db_column='review'
     )
     text = models.TextField(
         max_length=500,
