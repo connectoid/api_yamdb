@@ -1,6 +1,3 @@
-import random
-from datetime import datetime
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -118,7 +115,9 @@ class TitleViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AdminOnly,)
+    permission_classes = (AdminOnly, IsAuthenticated)
+    lookup_field = 'username'
+    lookup_value_regex = r'[\w\@\.\+\-]+'
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('username',)
 
