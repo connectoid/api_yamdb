@@ -9,8 +9,7 @@ class Command(BaseCommand):
     help = "Loads data from csv"
 
     def handle(self, *args, **options):
-        print('hi')
-        with open('../static/data/users.csv') as csvfile:
+        with open('static/data/users.csv', 'r', encoding='utf-8') as csvfile:
             dict_reader = DictReader(csvfile)
             for row in dict_reader:
                 user = User(username=row['username'],
@@ -20,25 +19,25 @@ class Command(BaseCommand):
                             first_name=row['first_name'],
                             last_name=row['last_name'])
                 user.save()
-        with open('../static/data/category.csv') as csvfile:
+        with open('static/data/category.csv') as csvfile:
             dict_reader = DictReader(csvfile)
             for row in dict_reader:
                 category = Category(name=row['name'], slug=row['slug'])
                 category.save()
 
-        with open('../static/data/genre.csv') as csvfile:
+        with open('static/data/genre.csv') as csvfile:
             dict_reader = DictReader(csvfile)
             for row in dict_reader:
                 genre = Genre(name=row['name'], slug=row['slug'])
                 genre.save()
-        with open('../static/data/titles.csv') as csvfile:
+        with open('static/data/titles.csv') as csvfile:
             dict_reader = DictReader(csvfile)
             for row in dict_reader:
                 title = Title(name=row['name'],
                               year=row['year'],
-                              categories=row['category'])
+                              category=row['category'])
                 title.save()
-        with open('../static/data/genre_title.csv') as csvfile:
+        with open('static/data/genre_title.csv') as csvfile:
             dict_reader = DictReader(csvfile)
             for row in dict_reader:
                 genre = Genre.objects.get(id=row['genre_id'])
@@ -46,7 +45,7 @@ class Command(BaseCommand):
                 title.genre(genre)
                 title.save()
 
-        with open('../static/data/comments.csv') as csvfile:
+        with open('static/data/comments.csv') as csvfile:
             dict_reader = DictReader(csvfile)
             for row in dict_reader:
                 comment = Comment(review=row['review_id'],
@@ -55,7 +54,7 @@ class Command(BaseCommand):
                                   pub_date=row['pub_date'])
                 comment.save()
 
-        with open('../static/data/review.csv') as csvfile:
+        with open('static/data/review.csv') as csvfile:
             dict_reader = DictReader(csvfile)
             for row in dict_reader:
                 review = Review(title=row['title_id'],
