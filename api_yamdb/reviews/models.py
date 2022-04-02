@@ -12,9 +12,6 @@ class User(AbstractUser):
                             choices=settings.ROLE_CHOICES,
                             default='USER'
                             )
-    first_name = models.CharField(max_length=128, blank=True, null=True)
-    last_name = models.CharField(max_length=128, blank=True, null=True)
-    password = models.CharField(max_length=128, blank=True, null=True)
 
     def __str__(self):
         return self.username
