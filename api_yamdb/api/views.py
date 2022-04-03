@@ -2,11 +2,10 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import status, filters, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
-from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework_simplejwt.tokens import AccessToken
@@ -32,10 +31,12 @@ def confirmation_code(request):
     email = serializer.data['email']
     if not User.objects.filter(username=username).exists():
         user = User.objects.create_user(username=username, email=email)
+        # user = serializer.save()
         send_confirm_code(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     user = get_object_or_404(User, username=username, email=email)
     send_confirm_code(user)
+    # serializer.save()
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -124,29 +125,25 @@ class TitleViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AdminOnly, IsAuthenticated)
+    permission_classes = (AdminOnly,)
     lookup_field = 'username'
     lookup_value_regex = r'[\w\@\.\+\-]+'
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('username',)
 
-
-class UserInfoView(APIView):
-    """ViewSet для User"""
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        queryset = User.objects.get(username=request.user.username)
-        serializer = UserInfoSerializer(queryset)
+    @action(
+        methods=('get', 'patch'),
+        detail=False,
+        url_path='me',
+        permission_classes=(IsAuthenticated,),
+        serializer_class=UserInfoSerializer
+    )
+    def user_info(self, request, pk=None):
+        user = get_object_or_404(User, pk=request.user.id)
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request):
-        user = User.objects.get(username=request.user.username)
-        serializer = UserInfoSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def send_confirm_code(user):

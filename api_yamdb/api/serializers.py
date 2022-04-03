@@ -1,6 +1,7 @@
 import re
 import datetime
 
+from django.conf import settings
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -12,15 +13,21 @@ from rest_framework.exceptions import ValidationError
 
 class UserSerializer(serializers.ModelSerializer):
     """User serializer"""
-    username = serializers.CharField(required=True)
-    email = serializers.CharField(required=True)
-    role = serializers.StringRelatedField(read_only=True)
+    username = serializers.CharField(max_length=150, required=True)
+    email = serializers.EmailField(max_length=254, required=True)
 
     class Meta:
         model = User
         fields = (
             'username', 'first_name', 'last_name', 'email', 'bio', 'role'
         )
+
+    def validate_username(self, username):
+        if username == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя пользователя "me" не разрешено.'
+            )
+        return username
 
 
 class EmailSerializer(serializers.ModelSerializer):
@@ -160,10 +167,8 @@ class TitleSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserInfoSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
-    username = serializers.CharField(required=True)
-    role = serializers.StringRelatedField(read_only=True)
+class UserInfoSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
 
     class Meta:
         model = User

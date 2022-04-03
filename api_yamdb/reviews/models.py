@@ -11,8 +11,9 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     role = models.CharField(max_length=20,
                             choices=settings.ROLE_CHOICES,
-                            default='USER'
+                            default='user'
                             )
+    password = models.CharField(max_length=128, blank=True, null=True)
 
     def __str__(self):
         return self.username
