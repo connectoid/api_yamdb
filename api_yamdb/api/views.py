@@ -1,26 +1,28 @@
 from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status, filters, viewsets
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.response import Response
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth.tokens import default_token_generator
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from django_filters.rest_framework import DjangoFilterBackend
 
-
-from reviews.models import Category, Genre, User, Review, Comment, Title
-from .mixins import (UpdateDeleteViewSet, ListRetriveCreateDeleteViewSet,
-                     ListCreateDeleteViewSet)
-from .permissions import AdminOnly, OwnerAdminModeratorOrReadOnly, AdminOrReadOnly, ReadOnly
-from .serializers import (CategorySerializer, ConfirmCodeSerializer,
-                          EmailSerializer, GenreSerializer,
-                          ReviewSerializer, CommentSerializer, TitleSerializer,
-                          UserSerializer, UserInfoSerializer,
-                          TitleCreateSerializer)
+from reviews.models import Category, Genre, Review, Title, User
+from .filters import FilterTitle
+from .mixins import ListCreateDeleteViewSet, UpdateDeleteViewSet
+from .permissions import (AdminOnly, AdminOrReadOnly,
+                          OwnerAdminModeratorOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          ConfirmCodeSerializer, EmailSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleCreateSerializer, TitleSerializer,
+                          UserInfoSerializer, UserSerializer)
 
 
 @api_view(['POST'])
@@ -89,7 +91,6 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    #permission_classes = (AdminOnly, )
     permission_classes = (AdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
@@ -100,7 +101,6 @@ class GenreViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    #permission_classes = (AdminOnly, )
     permission_classes = (AdminOrReadOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
@@ -109,11 +109,9 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # permission_classes = (AdminOnly,)
     permission_classes = (AdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year',)
+    filter_class = FilterTitle
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):
@@ -137,7 +135,7 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
         serializer_class=UserInfoSerializer
     )
-    def user_info(self, request, pk=None):
+    def user_info(self, request):
         user = get_object_or_404(User, pk=request.user.id)
         serializer = self.get_serializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

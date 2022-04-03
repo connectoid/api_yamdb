@@ -1,13 +1,14 @@
-import re
 import datetime
+import re
 
 from django.db.models import Avg
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-from reviews.models import Category, Comment, Genre, Review, Title, User
-from rest_framework.relations import SlugRelatedField
-from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
+from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator
+
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -109,7 +110,7 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'category', 'genre',
-            'year', 'descriptions', 'rating',
+            'year', 'description', 'rating',
         )
         validators = [
             UniqueTogetherValidator(
