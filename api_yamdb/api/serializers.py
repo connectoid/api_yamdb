@@ -13,8 +13,6 @@ from rest_framework.exceptions import ValidationError
 
 class UserSerializer(serializers.ModelSerializer):
     """User serializer"""
-    username = serializers.CharField(max_length=150, required=True)
-    email = serializers.EmailField(max_length=254, required=True)
 
     class Meta:
         model = User
@@ -32,8 +30,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.ModelSerializer):
     """Email serializer"""
-    email = serializers.EmailField(required=True)
-    username = serializers.CharField(required=True)
 
     class Meta:
         model = User
