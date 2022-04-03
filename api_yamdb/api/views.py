@@ -138,11 +138,7 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
         serializer_class=UserInfoSerializer
     )
-<<<<<<< HEAD
-    def set_profile(self, request, pk=None):
-=======
     def user_info(self, request, pk=None):
->>>>>>> 54e260533d2dd90cf1c08ad4cbcdfd2ad936d8b6
         user = get_object_or_404(User, pk=request.user.id)
         serializer = self.get_serializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
