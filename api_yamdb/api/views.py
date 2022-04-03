@@ -90,8 +90,8 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     #permission_classes = (AdminOnly, )
-    permission_classes = (AdminOrReadOnly,)   
-    pagination_class = PageNumberPagination
+    permission_classes = (AdminOrReadOnly,)
+    pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
 
