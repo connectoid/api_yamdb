@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
+from pyparsing import empty
 
 from api.validators import validate_score
 

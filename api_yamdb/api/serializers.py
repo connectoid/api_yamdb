@@ -84,6 +84,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+<<<<<<< HEAD
+=======
+    #description = serializers.StringRelatedField(required=False)
+>>>>>>> 54e260533d2dd90cf1c08ad4cbcdfd2ad936d8b6
 
     class Meta:
         model = Category
@@ -153,8 +157,14 @@ class TitleSerializer(serializers.ModelSerializer):
         ]
 
     def get_rating(self, obj):
+<<<<<<< HEAD
         rating = obj.reviews.all().aggregate(Avg('score'))
         return rating['score__avg']
+=======
+        avg_score = obj.reviews.all().aggregate(Avg('score'))
+        rating = avg_score['score__avg']
+        return rating
+>>>>>>> 54e260533d2dd90cf1c08ad4cbcdfd2ad936d8b6
 
     def validate_year(self, value):
         year = datetime.date.today().year
