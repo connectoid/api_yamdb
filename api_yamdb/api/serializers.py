@@ -1,7 +1,6 @@
 import re
 import datetime
 
-from django.conf import settings
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -101,29 +100,9 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitleListSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
-
-    class Meta:
-        model = Title
-        exclude = ('descriptions',)
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        read_only=False,
-        queryset=Category.objects.all()
-    )
-    # category = CategorySerializer()
-    genre = serializers.SlugRelatedField(
-        slug_field='slug',
-        read_only=False,
-        many=True,
-        queryset=Genre.objects.all()
-    )
-    # genre = GenreSerializer(many=True)
     rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -144,14 +123,6 @@ class TitleSerializer(serializers.ModelSerializer):
         rating = obj.reviews.all().aggregate(Avg('score'))
         return rating['score__avg']
 
-    def validate_year(self, value):
-        year = datetime.date.today().year
-        if value > year:
-            raise serializers.ValidationError(
-                f'Год выпуска не может быть больше {year}'
-            )
-        return value
-
 
 class UserInfoSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
@@ -161,3 +132,23 @@ class UserInfoSerializer(UserSerializer):
         fields = (
             'username', 'first_name', 'last_name', 'email', 'bio', 'role'
         )
+
+
+class TitleCreateSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(slug_field='slug',
+                                         queryset=Genre.objects.all(),
+                                         many=True)
+    category = serializers.SlugRelatedField(slug_field='slug',
+                                            queryset=Category.objects.all())
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+    def validate_year(self, value):
+        year = datetime.date.today().year
+        if value > year:
+            raise serializers.ValidationError(
+                f'Год выпуска не может быть больше {year}'
+            )
+        return value

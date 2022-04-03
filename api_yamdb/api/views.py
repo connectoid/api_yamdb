@@ -19,8 +19,8 @@ from .permissions import AdminOnly, OwnerAdminModeratorOrReadOnly, AdminOrReadOn
 from .serializers import (CategorySerializer, ConfirmCodeSerializer,
                           EmailSerializer, GenreSerializer,
                           ReviewSerializer, CommentSerializer, TitleSerializer,
-                          TitleListSerializer, UserSerializer,
-                          UserInfoSerializer)
+                          UserSerializer, UserInfoSerializer,
+                          TitleCreateSerializer)
 
 
 @api_view(['POST'])
@@ -32,12 +32,10 @@ def confirmation_code(request):
     email = serializer.data['email']
     if not User.objects.filter(username=username).exists():
         user = User.objects.create_user(username=username, email=email)
-        # user = serializer.save()
         send_confirm_code(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     user = get_object_or_404(User, username=username, email=email)
     send_confirm_code(user)
-    # serializer.save()
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -111,15 +109,15 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    #permission_classes = (AdminOnly, )
+    # permission_classes = (AdminOnly,)
     permission_classes = (AdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year',)
 
     def get_serializer_class(self):
-        if self.action == 'list':
-            return TitleListSerializer
+        if self.request.method in ('POST', 'PATCH',):
+            return TitleCreateSerializer
         return TitleSerializer
 
 
