@@ -2,13 +2,10 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
-
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
@@ -60,7 +57,7 @@ class ReviewViewSet(UpdateDeleteViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (OwnerAdminModeratorOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    
+
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
         return title.reviews.all()
@@ -75,7 +72,7 @@ class CommentViewSet(UpdateDeleteViewSet):
     serializer_class = CommentSerializer
     permission_classes = (OwnerAdminModeratorOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    
+
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
         return review.comments.all()
@@ -102,7 +99,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (AdminOrReadOnly,)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('name',)
 
@@ -111,7 +108,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (AdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_class = FilterTitle
+    filterset_class = FilterTitle
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):
