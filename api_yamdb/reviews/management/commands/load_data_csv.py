@@ -47,7 +47,9 @@ class Command(BaseCommand):
                     to_db.append([row[col] for col in fields])
             count = len(fields)
             table_name = TABLES[filename]
-            query_str = f"INSERT INTO {table_name} ({', '.join(fields)}) VALUES ({('?, ' * count)[:-2]});"
+            query_str = (
+                f"INSERT INTO {table_name} ({', '.join(fields)}) "
+                f"VALUES ({('?, ' * count)[:-2]});")
 
             cur.executemany(query_str, to_db,)
             con.commit()
