@@ -14,8 +14,9 @@ class OwnerAdminModeratorOrReadOnly(permissions.BasePermission):
         user = request.user
         return (
             request.method in permissions.SAFE_METHODS or
-            obj.author == request.user or
-            user.is_admin or user.is_moderator
+            obj.author == user or
+            user.is_admin or user.is_moderator or
+            user.is_user
         )
 
 class AdminOrReadOnly(permissions.BasePermission):
@@ -36,9 +37,9 @@ class ReadOnly(permissions.BasePermission):
 class AdminOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        role_list = settings.ROLE_CHOICES[2]
-        return (request.method in permissions.SAFE_METHODS
-                or request.user.role in role_list)
+        user = request.user
+        return (user.is_authenticated and user.is_admin
+                or user.is_superuser)
 
     def has_object_permission(self, request, view, obj):
         user = request.user
