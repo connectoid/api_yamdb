@@ -84,11 +84,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    description = serializers.StringRelatedField(required=False)
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', 'slug')
 
     def validate_slug(self, value):
         pattern = '^[-a-zA-Z0-9_]+$'
@@ -104,7 +103,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        exclude = ('id',)
 
 
 class TitleListSerializer(serializers.ModelSerializer):
@@ -137,13 +136,13 @@ class TitleSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Genre.objects.all()
     )
-    score = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'category', 'genre',
-            'year', 'descriptions', 'score',
+            'year', 'descriptions', 'rating',
         )
         validators = [
             UniqueTogetherValidator(
@@ -153,9 +152,9 @@ class TitleSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def get_score(self, obj):
-        score = obj.reviews.all().aggregate(Avg('score'))
-        return score['score__avg']
+    def get_rating(self, obj):
+        rating = obj.reviews.all().aggregate(Avg('score'))
+        return rating['score__avg']
 
     def validate_year(self, value):
         year = datetime.date.today().year
