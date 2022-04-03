@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
-from pyparsing import empty
 
 from api.validators import validate_score
 
@@ -33,7 +32,7 @@ class User(AbstractUser):
 
 class Genre(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -42,7 +41,7 @@ class Genre(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.CharField(max_length=50, unique=True)
-    description = models.TextField(null=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
@@ -62,7 +61,7 @@ class Title(models.Model):
         null=True,
         db_column='category'
     )
-    descriptions = models.TextField(null=True, blank=True)
+    descriptions = models.TextField(blank=True)
     year = models.IntegerField()
 
     def __str__(self):
