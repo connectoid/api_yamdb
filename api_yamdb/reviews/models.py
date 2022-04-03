@@ -61,7 +61,7 @@ class Title(models.Model):
         null=True,
         db_column='category'
     )
-    descriptions = models.TextField(blank=True)
+    description = models.TextField(blank=True)
     year = models.IntegerField()
 
     def __str__(self):

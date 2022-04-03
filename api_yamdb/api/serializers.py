@@ -109,7 +109,7 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'category', 'genre',
-            'year', 'descriptions', 'rating',
+            'year', 'description', 'rating',
         )
         validators = [
             UniqueTogetherValidator(
