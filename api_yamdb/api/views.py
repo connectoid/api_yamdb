@@ -13,7 +13,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 
 from reviews.models import Category, Genre, User, Review, Comment, Title
-from .mixins import UpdateDeleteViewSet, ListCreateDeleteViewSet
+from .mixins import (UpdateDeleteViewSet, ListRetriveCreateDeleteViewSet,
+                     ListCreateDeleteViewSet)
 from .permissions import AdminOnly, OwnerAdminModeratorOrReadOnly, AdminOrReadOnly, ReadOnly
 from .serializers import (CategorySerializer, ConfirmCodeSerializer,
                           EmailSerializer, GenreSerializer,
@@ -112,7 +113,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     #permission_classes = (AdminOnly, )
     permission_classes = (AdminOrReadOnly,)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year',)
 
