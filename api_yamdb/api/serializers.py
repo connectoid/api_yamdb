@@ -20,13 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
             'username', 'first_name', 'last_name', 'email', 'bio', 'role'
         )
 
-    def validate_username(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Использовать имя пользователя "me" не разрешено.'
-            )
-        return username
-
 
 class EmailSerializer(serializers.ModelSerializer):
     """Email serializer"""

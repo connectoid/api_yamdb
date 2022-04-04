@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -6,11 +5,20 @@ from api.validators import validate_score
 
 
 class User(AbstractUser):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+    ROLE_CHOICES = [
+        (USER, USER),
+        (MODERATOR, MODERATOR),
+        (ADMIN, ADMIN),
+    ]
+
     email = models.EmailField(max_length=55, unique=True, blank=False)
     bio = models.TextField(blank=True)
     role = models.CharField(max_length=20,
-                            choices=settings.ROLE_CHOICES,
-                            default='user'
+                            choices=ROLE_CHOICES,
+                            default=USER
                             )
     password = models.CharField(max_length=128, blank=True, null=True)
 
@@ -22,15 +30,15 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == 'user'
+        return self.role == self.USER
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
+        return self.role == self.MODERATOR
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role == self.ADMIN
 
 
 class Genre(models.Model):
