@@ -7,4 +7,3 @@ def validate_score(value):
             ('Оценка должна быть от 1 до 10'),
             params={'value': value},
         )
-

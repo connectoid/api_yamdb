@@ -1,6 +1,6 @@
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 
 from api.validators import validate_score
 
@@ -13,6 +13,9 @@ class User(AbstractUser):
                             default='user'
                             )
     password = models.CharField(max_length=128, blank=True, null=True)
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return self.username
@@ -41,7 +44,6 @@ class Genre(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.CharField(max_length=50, unique=True)
-    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
@@ -61,7 +63,7 @@ class Title(models.Model):
         null=True,
         db_column='category'
     )
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     year = models.IntegerField()
 
     def __str__(self):
