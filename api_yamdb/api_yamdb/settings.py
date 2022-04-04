@@ -97,11 +97,6 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 AUTH_USER_MODEL = 'reviews.User'
 
-ROLE_CHOICES = [
-    ('user', 'User'),
-    ('moderator', 'Moderator'),
-    ('admin', 'Admin')
-]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
