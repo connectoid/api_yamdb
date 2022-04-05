@@ -19,6 +19,9 @@ class UserSerializer(serializers.ModelSerializer):
             'username', 'first_name', 'last_name', 'email', 'bio', 'role'
         )
 
+    def validate_username(self, username):
+        return username_not_me(username)
+
 
 class EmailSerializer(serializers.ModelSerializer):
     """Email serializer"""
