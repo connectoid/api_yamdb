@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -6,11 +5,20 @@ from api.validators import validate_score, title_year_validator
 
 
 class User(AbstractUser):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+    ROLE_CHOICES = [
+        (USER, USER),
+        (MODERATOR, MODERATOR),
+        (ADMIN, ADMIN),
+    ]
+
     email = models.EmailField(max_length=55, unique=True, blank=False)
     bio = models.TextField(blank=True)
     role = models.CharField(max_length=20,
-                            choices=settings.ROLE_CHOICES,
-                            default='user'
+                            choices=ROLE_CHOICES,
+                            default=USER
                             )
     password = models.CharField(max_length=128, blank=True, null=True)
 
@@ -22,15 +30,15 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == 'user'
+        return self.role == self.USER
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
+        return self.role == self.MODERATOR
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role == self.ADMIN
 
 
 class Genre(models.Model):
@@ -103,6 +111,7 @@ class Review(models.Model):
         related_name='reviews',
         on_delete=models.CASCADE,
         verbose_name='Произведение',
+        db_index=True
     )
     text = models.TextField(
         max_length=500,
@@ -125,6 +134,9 @@ class Review(models.Model):
     )
 
     class Meta:
+        ordering = ['pub_date']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         constraints = [
             models.UniqueConstraint(fields=['author', 'title'],
                                     name='unique_review')
@@ -158,3 +170,13 @@ class Comment(models.Model):
         auto_now_add=True,
         verbose_name='Дата'
     )
+
+    class Meta:
+        ordering = ['pub_date']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return (
+            f'{self.text[:50]}'
+        )

@@ -1,6 +1,5 @@
-from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
+import uuid
+
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
@@ -21,6 +20,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleSerializer,
                           UserInfoSerializer, UserSerializer)
+from .utils import send_confirm_code
 
 
 @api_view(['POST'])
@@ -28,14 +28,14 @@ def confirmation_code(request):
     """Send confirmation_code by email"""
     serializer = EmailSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.data['username']
-    email = serializer.data['email']
+    username = serializer.validated_data['username']
+    email = serializer.validated_data['email']
     if not User.objects.filter(username=username).exists():
         user = User.objects.create_user(username=username, email=email)
-        send_confirm_code(user)
+        send_confirm_code(user.email)
         return Response(serializer.data, status=status.HTTP_200_OK)
     user = get_object_or_404(User, username=username, email=email)
-    send_confirm_code(user)
+    send_confirm_code(user.email)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -45,10 +45,11 @@ def get_jwt_token(request):
     """Check confirmation_code and send JWT-token"""
     serializer = ConfirmCodeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.data['username']
+    username = serializer.validated_data['username']
     user = get_object_or_404(User, username=username)
-    confirmation_code = serializer.data['confirmation_code']
-    if default_token_generator.check_token(user, confirmation_code):
+    confirmation_code = serializer.validated_data['confirmation_code']
+    uuid_code = str(uuid.uuid3(uuid.NAMESPACE_DNS, user.email))
+    if uuid_code == confirmation_code:
         token = AccessToken.for_user(user)
         return Response({'token': str(token)}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -142,15 +143,3 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-def send_confirm_code(user):
-    """Send confirmation_code"""
-    confirmation_code = default_token_generator.make_token(user)
-    send_mail(
-        subject='Код авторизации',
-        message=f'Ваш код для авторизации на сайте: {confirmation_code}',
-        from_email=f'{settings.EMAIL_HOST_USER}',
-        recipient_list=[user.email],
-        fail_silently=False,
-    )
