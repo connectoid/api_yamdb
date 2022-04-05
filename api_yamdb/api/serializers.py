@@ -1,7 +1,5 @@
-import datetime
-import re
+from django.utils import timezone
 
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -76,28 +74,20 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('name', 'slug')
-
-    def validate_slug(self, value):
-        pattern = '^[-a-zA-Z0-9_]+$'
-        if not re.fullmatch(pattern, value):
-            raise serializers.ValidationError(
-                'Недопустимые символы в поле slug'
-            )
-        return value
+        exclude = ('id',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('name', 'slug')
+        exclude = ('id',)
 
 
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -112,10 +102,6 @@ class TitleSerializer(serializers.ModelSerializer):
                 message='Такое произведениеe уже сущесвтует'
             )
         ]
-
-    def get_rating(self, obj):
-        rating = obj.reviews.all().aggregate(Avg('score'))
-        return rating['score__avg']
 
 
 class UserInfoSerializer(UserSerializer):
@@ -140,7 +126,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_year(self, value):
-        year = datetime.date.today().year
+        year = timezone.datetime.now().year
         if value > year:
             raise serializers.ValidationError(
                 f'Год выпуска не может быть больше {year}'

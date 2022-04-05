@@ -8,6 +8,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from django.db.models import Avg
 
 from reviews.models import Category, Genre, Review, Title, User
 from .filters import FilterTitle
@@ -115,6 +116,9 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method in ('POST', 'PATCH',):
             return TitleCreateSerializer
         return TitleSerializer
+
+    def get_queryset(self):
+        return Title.objects.annotate(rating=Avg('reviews__score'))
 
 
 class UserViewSet(viewsets.ModelViewSet):

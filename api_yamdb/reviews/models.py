@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from api.validators import validate_score
+from api.validators import validate_score, title_year_validator
 
 
 class User(AbstractUser):
@@ -42,37 +42,64 @@ class User(AbstractUser):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=256, verbose_name='Имя жанра')
+    slug = models.SlugField(max_length=50, unique=True, verbose_name='Слаг')
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.name
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=256, verbose_name='Имя категории')
+    slug = models.SlugField(max_length=50, unique=True, verbose_name='Слаг')
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=250)
+    name = models.CharField(
+        max_length=250,
+        verbose_name='Название произведения',
+        db_index=True
+    )
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
-        db_column='genre'
+        db_column='genre',
+        verbose_name='Жанр',
+        db_index=True,
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
         null=True,
-        db_column='category'
+        db_column='category',
+        verbose_name='Категория',
+        db_index=True
     )
-    description = models.TextField(blank=True, null=True)
-    year = models.IntegerField()
+    description = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='Описание'
+    )
+    year = models.IntegerField(
+        validators=[title_year_validator],
+        verbose_name='Дата выпуска'
+    )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name
