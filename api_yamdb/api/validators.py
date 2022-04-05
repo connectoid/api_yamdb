@@ -18,3 +18,9 @@ def title_year_validator(value):
             f'Год выпуска не может быть больше {year}'
         )
     return value
+
+
+def username_not_me(username):
+    if username == 'me':
+        raise serializers.ValidationError('использовать имя "me" запрещено!')
+    return username

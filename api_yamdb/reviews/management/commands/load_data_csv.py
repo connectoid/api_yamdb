@@ -24,7 +24,6 @@ class Command(BaseCommand):
                             first_name=row['first_name'],
                             last_name=row['last_name'])
 
-
         with open('static/data/category.csv', 'r', encoding='utf-8') as csvfile:
             dict_reader = csv.DictReader(csvfile)
             for row in dict_reader:
@@ -32,14 +31,12 @@ class Command(BaseCommand):
                                     name=row['name'],
                                     slug=row['slug'])
 
-        
         with open('static/data/genre.csv', 'r', encoding='utf-8') as csvfile:
             dict_reader = csv.DictReader(csvfile)
             for row in dict_reader:
                 Genre.objects.get_or_create(
                                 name=row['name'],
                                 slug=row['slug'])
-
 
         with open('static/data/titles.csv', 'r', encoding='utf-8') as csvfile:
             dict_reader = csv.DictReader(csvfile)
@@ -49,7 +46,6 @@ class Command(BaseCommand):
                                 year=row['year'],
                                 category_id=row['category'])
 
-        
         with open('static/data/genre_title.csv') as csvfile:
             dict_reader = csv.DictReader(csvfile)
             for row in dict_reader:

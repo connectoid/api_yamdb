@@ -14,16 +14,20 @@ class User(AbstractUser):
         (ADMIN, ADMIN),
     ]
 
-    email = models.EmailField(max_length=55, unique=True, blank=False)
-    bio = models.TextField(blank=True)
+    email = models.EmailField(max_length=55, unique=True,
+                              blank=False, verbose_name='Почта')
+    bio = models.TextField(blank=True, verbose_name='Биография')
     role = models.CharField(max_length=20,
                             choices=ROLE_CHOICES,
-                            default=USER
+                            default=USER,
+                            verbose_name='Роль'
                             )
     password = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
         ordering = ['id']
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
         return self.username

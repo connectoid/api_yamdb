@@ -7,6 +7,7 @@ from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
+from .validators import username_not_me
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,11 +28,7 @@ class EmailSerializer(serializers.ModelSerializer):
         fields = ('username', 'email',)
 
     def validate_username(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Использовать имя пользователя "me" не разрешено.'
-            )
-        return username
+        return username_not_me(username)
 
 
 class ConfirmCodeSerializer(serializers.Serializer):
