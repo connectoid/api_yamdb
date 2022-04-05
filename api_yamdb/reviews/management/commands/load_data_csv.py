@@ -1,21 +1,10 @@
 import csv
-import sqlite3
 
 from django.core.management import BaseCommand
 
-from reviews.models import User
+from reviews.models import User, Category, Genre, Title, Review, Comment
 
-DB = 'db.sqlite3'
 CSV_PATH = 'static/data/'
-TABLES = {
-    'category.csv': 'reviews_category',
-    'genre.csv': 'reviews_genre',
-    'titles.csv': 'reviews_title',
-    'genre_title.csv': 'reviews_title_genre',
-    'review.csv': 'reviews_review',
-    'comments.csv': 'reviews_comment',
-    'users.csv': 'reviews_user',
-}
 
 
 class Command(BaseCommand):
@@ -26,40 +15,64 @@ class Command(BaseCommand):
         with open('static/data/users.csv', 'r', encoding='utf-8') as csvfile:
             dict_reader = csv.DictReader(csvfile)
             for row in dict_reader:
-                user = User(username=row['username'],
+                User.objects.get_or_create(
+                            id=row['id'],
+                            username=row['username'],
                             email=row['email'],
                             role=row['role'],
                             bio=row['bio'],
                             first_name=row['first_name'],
                             last_name=row['last_name'])
-                user.save()
 
-        def import_csv(filename):
 
-            con = sqlite3.connect(DB)
-            cur = con.cursor()
+        with open('static/data/category.csv', 'r', encoding='utf-8') as csvfile:
+            dict_reader = csv.DictReader(csvfile)
+            for row in dict_reader:
+                Category.objects.get_or_create(
+                                    name=row['name'],
+                                    slug=row['slug'])
 
-            with open(CSV_PATH + filename, 'r', encoding='utf-8') as file:
-                values = csv.DictReader(file, delimiter=",")
-                fields = values.fieldnames
-                to_db = []
-                for row in values:
-                    to_db.append([row[col] for col in fields])
-            count = len(fields)
-            table_name = TABLES[filename]
-            query_str = (
-                f"INSERT INTO {table_name} ({', '.join(fields)}) "
-                f"VALUES ({('?, ' * count)[:-2]});")
+        
+        with open('static/data/genre.csv', 'r', encoding='utf-8') as csvfile:
+            dict_reader = csv.DictReader(csvfile)
+            for row in dict_reader:
+                Genre.objects.get_or_create(
+                                name=row['name'],
+                                slug=row['slug'])
 
-            cur.executemany(query_str, to_db,)
-            con.commit()
-            con.close()
 
-        import_csv('category.csv')
-        import_csv('genre.csv')
-        import_csv('titles.csv')
-        import_csv('genre_title.csv')
-        import_csv('review.csv')
-        import_csv('comments.csv')
+        with open('static/data/titles.csv', 'r', encoding='utf-8') as csvfile:
+            dict_reader = csv.DictReader(csvfile)
+            for row in dict_reader:
+                Title.objects.get_or_create(
+                                name=row['name'],
+                                year=row['year'],
+                                category_id=row['category'])
+
+        
+        with open('static/data/genre_title.csv') as csvfile:
+            dict_reader = csv.DictReader(csvfile)
+            for row in dict_reader:
+                title = Title.objects.get(id=row['title_id'])
+                title.genre.add(row['genre_id'])
+
+        with open('static/data/review.csv', 'r', encoding='utf-8') as csvfile:
+            dict_reader = csv.DictReader(csvfile)
+            for row in dict_reader:
+                Review.objects.get_or_create(
+                                title_id=row['title_id'],
+                                text=row['text'],
+                                author_id=row['author'],
+                                score=row['score'],
+                                pub_date=row['pub_date'])
+
+        with open('static/data/comments.csv', 'r', encoding='utf-8') as csvfile:
+            dict_reader = csv.DictReader(csvfile)
+            for row in dict_reader:
+                Comment.objects.get_or_create(
+                                review_id=row['review_id'],
+                                text=row['text'],
+                                author_id=row['author'],
+                                pub_date=row['pub_date'])
 
         self.stdout.write(self.style.SUCCESS('База данных успешно заполнена'))

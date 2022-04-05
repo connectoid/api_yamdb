@@ -84,6 +84,7 @@ class Review(models.Model):
         related_name='reviews',
         on_delete=models.CASCADE,
         verbose_name='Произведение',
+        db_index=True
     )
     text = models.TextField(
         max_length=500,
@@ -106,6 +107,9 @@ class Review(models.Model):
     )
 
     class Meta:
+        ordering = ['pub_date']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         constraints = [
             models.UniqueConstraint(fields=['author', 'title'],
                                     name='unique_review')
@@ -139,3 +143,13 @@ class Comment(models.Model):
         auto_now_add=True,
         verbose_name='Дата'
     )
+
+    class Meta:
+        ordering = ['pub_date']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return (
+            f'{self.text[:50]}'
+        )
