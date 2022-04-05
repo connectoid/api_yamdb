@@ -1,5 +1,4 @@
 from django.utils import timezone
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -99,7 +98,7 @@ class TitleSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Title.objects.all(),
                 fields=('name', 'year'),
-                message='Такое произведениеe уже сущесвтует'
+                message='Такое произведение уже существует'
             )
         ]
 

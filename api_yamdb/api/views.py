@@ -107,7 +107,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = (AdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filterset_class = FilterTitle
@@ -116,9 +116,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method in ('POST', 'PATCH',):
             return TitleCreateSerializer
         return TitleSerializer
-
-    def get_queryset(self):
-        return Title.objects.annotate(rating=Avg('reviews__score'))
 
 
 class UserViewSet(viewsets.ModelViewSet):
