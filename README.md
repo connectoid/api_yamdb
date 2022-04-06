@@ -33,3 +33,9 @@ python3 manage.py runserver
 ```
 http://127.0.0.1:8000/redoc/
 ```
+
+
+Разрабатывали проект:
+Кожушкевич Александр - https://github.com/kazhuha
+Живов Игорь - https://github.com/Jloogle
+Александр Белей - https://github.com/connectoid
