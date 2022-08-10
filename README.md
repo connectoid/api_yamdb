@@ -56,10 +56,6 @@ http://127.0.0.1:8000/redoc/
 
 
 Разрабатывали проект:<br>
-Тимлид:<br>
 Живов Игорь - https://github.com/Jloogle <br>
-Разработчик №1:<br>
 Кожушкевич Александр - https://github.com/kazhuha <br>
-Разработчик №2:<br>
 Александр Белей - https://github.com/connectoid
->>>>>>> 571bdbbb1a25540c4dfad2f462d89aa27e7956a8
